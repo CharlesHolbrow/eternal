@@ -13,12 +13,12 @@ type Client struct {
 }
 
 // OnConnect is called when client connects via WebSocket
-func (cc Client) OnConnect(client *synk.Client) {
+func (cc Client) OnConnect(client synk.Client) {
 	log.Println("Custom Client Connected:", client.ID())
 }
 
 // OnMessage is called when the client sends a message
-func (cc Client) OnMessage(client *synk.Client, method string, data []byte) {
+func (cc Client) OnMessage(client synk.Client, method string, data []byte) {
 	log.Println("Custom Client Message:", method)
 	switch method {
 	case "note":
@@ -33,13 +33,13 @@ func (cc Client) OnMessage(client *synk.Client, method string, data []byte) {
 }
 
 // OnSubscribe is called with the client changes their subscription
-func (cc Client) OnSubscribe(client *synk.Client, subKeys []string, objs []synk.Object) {
+func (cc Client) OnSubscribe(client synk.Client, subKeys []string, objs []synk.Object) {
 	log.Printf("Custom Client: Subscription add(%d) objs(%d)", len(subKeys), len(objs))
 }
 
-func (cc Client) noteEvent(client *synk.Client, ne NoteEvent) {
+func (cc Client) noteEvent(client synk.Client, ne NoteEvent) {
 	if json, err := json.Marshal(ne); err == nil {
-		client.Loader.Publish("piano", json)
+		client.Publish("piano", json)
 	} else {
 		fmt.Println("eternal client failed to marshall NoteEvent json", err.Error())
 	}
