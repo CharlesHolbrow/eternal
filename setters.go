@@ -2,6 +2,138 @@ package eternal
 
 import "github.com/CharlesHolbrow/synk"
 
+// cellDiff diff type for synk.Object
+type cellDiff struct {
+  AudioPath *string `json:"audioPath,omitempty"`
+  MapName *string `json:"mapName,omitempty"`
+  X *int `json:"x,omitempty"`
+  Y *int `json:"y,omitempty"`
+}
+
+// State returns a fully populated diff of the unresolved state
+func (o *Cell) State() interface{} {
+	d := cellDiff{
+    AudioPath: &o.AudioPath,
+    MapName: &o.MapName,
+    X: &o.X,
+    Y: &o.Y,
+  }
+  return d
+}
+
+// Resolve applies the current diff, then returns it
+func (o *Cell) Resolve() interface{} {
+  if o.diff.AudioPath != nil {o.AudioPath = *o.diff.AudioPath}
+  if o.diff.MapName != nil {o.MapName = *o.diff.MapName}
+  if o.diff.X != nil {o.X = *o.diff.X}
+  if o.diff.Y != nil {o.Y = *o.diff.Y}
+  o.V++
+  diff := o.diff
+  o.diff = cellDiff{}
+  return diff
+}
+
+// Changed checks if struct has been changed since the last .Resolve()
+func (o *Cell) Changed() bool {
+  return o.diff.AudioPath != nil ||
+		o.diff.MapName != nil ||
+		o.diff.X != nil ||
+		o.diff.Y != nil
+}
+
+// Diff getter
+func (o *Cell) Diff() interface{} { return o.diff }
+// Copy duplicates this object and returns an interface to it.
+// The object's diff will be copied too, with the exception of the diffMap for
+// array members. A diffMap is created automatically when we use array Element
+// setters (ex SetDataElement). Copy() will create shallow copies of unresolved
+// diffMaps. Usually we Resolve() after Copy() which means that our shallow copy
+// will be safe to send over a channel.
+func (o *Cell) Copy() synk.Object {
+	n := *o
+	return &n
+}
+// Init (ialize) all diff fields to the current values. The next call to
+// Resolve() will return a diff with all the fields initialized.
+func (o *Cell) Init() {
+	o.diff = o.State().(cellDiff)
+}
+// SetAudioPath on diff
+func (o *Cell) SetAudioPath(v string) {
+  if v != o.AudioPath {
+    o.diff.AudioPath = &v
+  } else {
+    o.diff.AudioPath = nil
+  }
+}
+// GetPrevAudioPath Gets the previous value. Ignores diff.
+func (o *Cell) GetPrevAudioPath() string { return o.AudioPath }
+// GetAudioPath from diff. Fall back to current value if no diff
+func (o *Cell) GetAudioPath() string {
+	if o.diff.AudioPath != nil {
+		return *o.diff.AudioPath
+	}
+	return o.AudioPath
+}
+// GetAudioPath. Diff method
+func (o cellDiff) GetAudioPath() *string { return o.AudioPath }
+// SetMapName on diff
+func (o *Cell) SetMapName(v string) {
+  if v != o.MapName {
+    o.diff.MapName = &v
+  } else {
+    o.diff.MapName = nil
+  }
+}
+// GetPrevMapName Gets the previous value. Ignores diff.
+func (o *Cell) GetPrevMapName() string { return o.MapName }
+// GetMapName from diff. Fall back to current value if no diff
+func (o *Cell) GetMapName() string {
+	if o.diff.MapName != nil {
+		return *o.diff.MapName
+	}
+	return o.MapName
+}
+// GetMapName. Diff method
+func (o cellDiff) GetMapName() *string { return o.MapName }
+// SetX on diff
+func (o *Cell) SetX(v int) {
+  if v != o.X {
+    o.diff.X = &v
+  } else {
+    o.diff.X = nil
+  }
+}
+// GetPrevX Gets the previous value. Ignores diff.
+func (o *Cell) GetPrevX() int { return o.X }
+// GetX from diff. Fall back to current value if no diff
+func (o *Cell) GetX() int {
+	if o.diff.X != nil {
+		return *o.diff.X
+	}
+	return o.X
+}
+// GetX. Diff method
+func (o cellDiff) GetX() *int { return o.X }
+// SetY on diff
+func (o *Cell) SetY(v int) {
+  if v != o.Y {
+    o.diff.Y = &v
+  } else {
+    o.diff.Y = nil
+  }
+}
+// GetPrevY Gets the previous value. Ignores diff.
+func (o *Cell) GetPrevY() int { return o.Y }
+// GetY from diff. Fall back to current value if no diff
+func (o *Cell) GetY() int {
+	if o.diff.Y != nil {
+		return *o.diff.Y
+	}
+	return o.Y
+}
+// GetY. Diff method
+func (o cellDiff) GetY() *int { return o.Y }
 // noteDiff diff type for synk.Object
 type noteDiff struct {
   SubKey *string `json:"subKey,omitempty"`

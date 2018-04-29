@@ -1,46 +1,86 @@
 package eternal
 
 import (
+	"fmt"
+	"image"
+	"log"
+
 	"github.com/CharlesHolbrow/synk"
 )
 
 // Fragment stores the contents of a subscription key
 type Fragment struct {
 	Mutator synk.Mutator
-	sKey1   string
+	MapName string
 	On      [128]*Note
+	Cells   map[string]*Cell
+	Keys    []string
 }
 
 // NewFragment - create a Fragment
 //
 // Requires a clean Mutator
-func NewFragment(k1 string, mutator synk.Mutator) *Fragment {
+func NewFragment(mapName string, area image.Rectangle, mutator synk.Mutator) *Fragment {
 
-	notes := &Fragment{
-		sKey1:   k1,
-		Mutator: mutator,
+	size := area.Size()
+	chunkCount := size.X * size.Y
+	chunkKeys := make([]string, 0, chunkCount)
+
+	for y := area.Min.Y; y < area.Max.Y; y++ {
+		for x := area.Min.X; x < area.Max.X; x++ {
+			chunkKeys = append(chunkKeys, makeSubKey(mapName, x, y))
+		}
 	}
 
-	objects, err := notes.Mutator.Load([]string{k1})
+	frag := &Fragment{
+		Keys:    chunkKeys,
+		MapName: mapName,
+		Mutator: mutator,
+		Cells:   make(map[string]*Cell),
+	}
+
+	objects, err := frag.Mutator.Load(frag.Keys)
 	if err != nil {
 		panic("Error initializing eternal Fragment: " + err.Error())
 	}
 
-	for _, obj := range objects {
-		if obj, ok := obj.(*Note); ok {
+	for _, v := range objects {
+
+		switch obj := v.(type) {
+		case *Cell:
+			frag.Cells[obj.TagID] = obj
+		case *Note:
 			if obj.Number < 0 || obj.Number > 127 {
 				mutator.Delete(obj)
 				continue
 			}
-			if notes.On[obj.Number] != nil {
+			if frag.On[obj.Number] != nil {
 				mutator.Delete(obj)
 				continue
 			}
-			notes.On[obj.Number] = obj
+			frag.On[obj.Number] = obj
 		}
 	}
 
-	return notes
+	fmt.Printf("Found %d Cells\n", len(frag.Cells))
+
+	return frag
+}
+
+// AddCell to the Fragment
+func (frag *Fragment) AddCell(c *Cell) {
+	c.SetMapName(frag.MapName)
+	frag.Mutator.Create(c) // Ensures TagID
+	frag.Cells[c.TagID] = c
+}
+
+// RemoveCell from the fragment
+func (frag *Fragment) RemoveCell(c *Cell) {
+	err := frag.Mutator.Delete(c)
+	if err != nil {
+		panic("error deleting cell with ID: " + c.TagID)
+	}
+	delete(frag.Cells, c.TagID)
 }
 
 // AddNote to the Fragment. The note's subscription key will be set.
@@ -48,7 +88,8 @@ func NewFragment(k1 string, mutator synk.Mutator) *Fragment {
 func (frag *Fragment) AddNote(n *Note) {
 	// Ensure SubKey
 	if n.GetSubKey() == "" {
-		n.SetSubKey(frag.sKey1)
+		log.Println("you must now spceify a subkey when adding a Note")
+		return
 	}
 
 	if frag.On[n.Number] != nil {
@@ -83,9 +124,4 @@ func (frag *Fragment) RemoveAllNotes() {
 		frag.Mutator.Delete(note)
 		frag.On[id] = nil
 	}
-}
-
-// K1 Gets the first subscription key
-func (frag *Fragment) K1() string {
-	return frag.sKey1
 }
