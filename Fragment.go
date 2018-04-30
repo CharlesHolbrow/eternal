@@ -15,25 +15,31 @@ type Fragment struct {
 	On      [128]*Note
 	Cells   map[string]*Cell
 	Keys    []string
+	KeyMap  map[string]bool
 }
 
 // NewFragment - create a Fragment
 //
 // Requires a clean Mutator
+// image.Rectangle is inclusive of the minimum, exclusive of max
 func NewFragment(mapName string, area image.Rectangle, mutator synk.Mutator) *Fragment {
 
 	size := area.Size()
 	chunkCount := size.X * size.Y
 	chunkKeys := make([]string, 0, chunkCount)
+	chunkKeyMap := make(map[string]bool, chunkCount)
 
 	for y := area.Min.Y; y < area.Max.Y; y++ {
 		for x := area.Min.X; x < area.Max.X; x++ {
-			chunkKeys = append(chunkKeys, makeSubKey(mapName, x, y))
+			subKey := makeSubKey(mapName, x, y)
+			chunkKeys = append(chunkKeys, subKey)
+			chunkKeyMap[subKey] = true
 		}
 	}
 
 	frag := &Fragment{
 		Keys:    chunkKeys,
+		KeyMap:  chunkKeyMap,
 		MapName: mapName,
 		Mutator: mutator,
 		Cells:   make(map[string]*Cell),

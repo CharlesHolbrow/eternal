@@ -10,10 +10,11 @@ import (
 //@PA:cell
 type Cell struct {
 	synk.Tag  `bson:",inline"`
-	AudioPath string `json:"audioPath"`
-	MapName   string `json:"map"`
-	X         int    `json:"x"`
-	Y         int    `json:"y"`
+	AudioPath string  `json:"audioPath"`
+	MapName   string  `json:"map"`
+	Hue       float32 `json:"hue"`
+	X         int     `json:"x"`
+	Y         int     `json:"y"`
 	diff      cellDiff
 }
 
