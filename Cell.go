@@ -14,6 +14,7 @@ type Cell struct {
 	MapName   string  `json:"map"`
 	Hue       float32 `json:"hue"`
 	Class     string  `json:"cls"`
+	MidiNote  int     `json:"midi"`
 	X         int     `json:"x"`
 	Y         int     `json:"y"`
 	diff      cellDiff
