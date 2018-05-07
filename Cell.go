@@ -13,6 +13,7 @@ type Cell struct {
 	AudioPath string  `json:"audioPath"`
 	MapName   string  `json:"map"`
 	Hue       float32 `json:"hue"`
+	Class     string  `json:"cls"`
 	X         int     `json:"x"`
 	Y         int     `json:"y"`
 	diff      cellDiff

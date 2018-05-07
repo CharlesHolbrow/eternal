@@ -4,9 +4,10 @@ import "github.com/CharlesHolbrow/synk"
 
 // cellDiff diff type for synk.Object
 type cellDiff struct {
-  MapName *string `json:"mapName,omitempty"`
-  AudioPath *string `json:"audioPath,omitempty"`
   Hue *float32 `json:"hue,omitempty"`
+  Class *string `json:"class,omitempty"`
+  AudioPath *string `json:"audioPath,omitempty"`
+  MapName *string `json:"mapName,omitempty"`
   X *int `json:"x,omitempty"`
   Y *int `json:"y,omitempty"`
 }
@@ -14,9 +15,10 @@ type cellDiff struct {
 // State returns a fully populated diff of the unresolved state
 func (o *Cell) State() interface{} {
 	d := cellDiff{
-    MapName: &o.MapName,
-    AudioPath: &o.AudioPath,
     Hue: &o.Hue,
+    Class: &o.Class,
+    AudioPath: &o.AudioPath,
+    MapName: &o.MapName,
     X: &o.X,
     Y: &o.Y,
   }
@@ -25,9 +27,10 @@ func (o *Cell) State() interface{} {
 
 // Resolve applies the current diff, then returns it
 func (o *Cell) Resolve() interface{} {
-  if o.diff.MapName != nil {o.MapName = *o.diff.MapName}
-  if o.diff.AudioPath != nil {o.AudioPath = *o.diff.AudioPath}
   if o.diff.Hue != nil {o.Hue = *o.diff.Hue}
+  if o.diff.Class != nil {o.Class = *o.diff.Class}
+  if o.diff.AudioPath != nil {o.AudioPath = *o.diff.AudioPath}
+  if o.diff.MapName != nil {o.MapName = *o.diff.MapName}
   if o.diff.X != nil {o.X = *o.diff.X}
   if o.diff.Y != nil {o.Y = *o.diff.Y}
   o.V++
@@ -38,9 +41,10 @@ func (o *Cell) Resolve() interface{} {
 
 // Changed checks if struct has been changed since the last .Resolve()
 func (o *Cell) Changed() bool {
-  return o.diff.MapName != nil ||
+  return o.diff.Hue != nil ||
+		o.diff.Class != nil ||
 		o.diff.AudioPath != nil ||
-		o.diff.Hue != nil ||
+		o.diff.MapName != nil ||
 		o.diff.X != nil ||
 		o.diff.Y != nil
 }
@@ -62,44 +66,6 @@ func (o *Cell) Copy() synk.Object {
 func (o *Cell) Init() {
 	o.diff = o.State().(cellDiff)
 }
-// SetMapName on diff
-func (o *Cell) SetMapName(v string) {
-  if v != o.MapName {
-    o.diff.MapName = &v
-  } else {
-    o.diff.MapName = nil
-  }
-}
-// GetPrevMapName Gets the previous value. Ignores diff.
-func (o *Cell) GetPrevMapName() string { return o.MapName }
-// GetMapName from diff. Fall back to current value if no diff
-func (o *Cell) GetMapName() string {
-	if o.diff.MapName != nil {
-		return *o.diff.MapName
-	}
-	return o.MapName
-}
-// GetMapName. Diff method
-func (o cellDiff) GetMapName() *string { return o.MapName }
-// SetAudioPath on diff
-func (o *Cell) SetAudioPath(v string) {
-  if v != o.AudioPath {
-    o.diff.AudioPath = &v
-  } else {
-    o.diff.AudioPath = nil
-  }
-}
-// GetPrevAudioPath Gets the previous value. Ignores diff.
-func (o *Cell) GetPrevAudioPath() string { return o.AudioPath }
-// GetAudioPath from diff. Fall back to current value if no diff
-func (o *Cell) GetAudioPath() string {
-	if o.diff.AudioPath != nil {
-		return *o.diff.AudioPath
-	}
-	return o.AudioPath
-}
-// GetAudioPath. Diff method
-func (o cellDiff) GetAudioPath() *string { return o.AudioPath }
 // SetHue on diff
 func (o *Cell) SetHue(v float32) {
   if v != o.Hue {
@@ -119,6 +85,63 @@ func (o *Cell) GetHue() float32 {
 }
 // GetHue. Diff method
 func (o cellDiff) GetHue() *float32 { return o.Hue }
+// SetClass on diff
+func (o *Cell) SetClass(v string) {
+  if v != o.Class {
+    o.diff.Class = &v
+  } else {
+    o.diff.Class = nil
+  }
+}
+// GetPrevClass Gets the previous value. Ignores diff.
+func (o *Cell) GetPrevClass() string { return o.Class }
+// GetClass from diff. Fall back to current value if no diff
+func (o *Cell) GetClass() string {
+	if o.diff.Class != nil {
+		return *o.diff.Class
+	}
+	return o.Class
+}
+// GetClass. Diff method
+func (o cellDiff) GetClass() *string { return o.Class }
+// SetAudioPath on diff
+func (o *Cell) SetAudioPath(v string) {
+  if v != o.AudioPath {
+    o.diff.AudioPath = &v
+  } else {
+    o.diff.AudioPath = nil
+  }
+}
+// GetPrevAudioPath Gets the previous value. Ignores diff.
+func (o *Cell) GetPrevAudioPath() string { return o.AudioPath }
+// GetAudioPath from diff. Fall back to current value if no diff
+func (o *Cell) GetAudioPath() string {
+	if o.diff.AudioPath != nil {
+		return *o.diff.AudioPath
+	}
+	return o.AudioPath
+}
+// GetAudioPath. Diff method
+func (o cellDiff) GetAudioPath() *string { return o.AudioPath }
+// SetMapName on diff
+func (o *Cell) SetMapName(v string) {
+  if v != o.MapName {
+    o.diff.MapName = &v
+  } else {
+    o.diff.MapName = nil
+  }
+}
+// GetPrevMapName Gets the previous value. Ignores diff.
+func (o *Cell) GetPrevMapName() string { return o.MapName }
+// GetMapName from diff. Fall back to current value if no diff
+func (o *Cell) GetMapName() string {
+	if o.diff.MapName != nil {
+		return *o.diff.MapName
+	}
+	return o.MapName
+}
+// GetMapName. Diff method
+func (o cellDiff) GetMapName() *string { return o.MapName }
 // SetX on diff
 func (o *Cell) SetX(v int) {
   if v != o.X {

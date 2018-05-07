@@ -21,13 +21,13 @@ func (cc Client) OnConnect(client synk.Client) {
 func (cc Client) OnMessage(client synk.Client, method string, data []byte) {
 	log.Println("Custom Client Message:", method)
 	switch method {
-	case "note":
-		note := &NoteEvent{}
-		if err := json.Unmarshal(data, note); err == nil {
-			fmt.Println("Note:", note)
-			cc.noteEvent(client, *note)
+	case "moveCell":
+		event := &MoveCellEvent{}
+		if err := json.Unmarshal(data, event); err == nil {
+			log.Println("MoveCellEvent:", event)
+			cc.handleMoveCellEvent(client, *event)
 		} else {
-			fmt.Println("Client send bad note event:", err)
+			fmt.Println("CLient requested bad moveCell event:", err)
 		}
 	}
 }
@@ -37,11 +37,11 @@ func (cc Client) OnSubscribe(client synk.Client, subKeys []string, objs []synk.O
 	log.Printf("Custom Client: Subscription add(%d) objs(%d)", len(subKeys), len(objs))
 }
 
-func (cc Client) noteEvent(client synk.Client, ne NoteEvent) {
-	if json, err := json.Marshal(ne); err == nil {
+func (cc Client) handleMoveCellEvent(client synk.Client, e MoveCellEvent) {
+	if json, err := json.Marshal(e); err == nil {
 		client.Publish("piano", json)
 	} else {
-		fmt.Println("eternal client failed to marshall NoteEvent json", err.Error())
+		log.Println("failed to re-marshall MoveCellEvent")
 	}
 }
 
@@ -51,14 +51,13 @@ func (cc Client) noteEvent(client synk.Client, ne NoteEvent) {
 /
 ***************************************************************/
 
-// NoteEvent messages may be send by the client
-type NoteEvent struct {
-	N  int
-	V  int
-	C  int
-	On bool
+// MoveCellEvent is send by the client as a request
+type MoveCellEvent struct {
+	ID string
+	X  int
+	Y  int
 }
 
-func (n NoteEvent) String() string {
-	return fmt.Sprintf("Note:%d vel:%d chan:%d on:%t", n.N, n.V, n.C, n.On)
+func (e MoveCellEvent) String() string {
+	return fmt.Sprintf("Move %s to (%d, %d)", e.ID, e.X, e.Y)
 }
